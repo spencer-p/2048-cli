@@ -72,6 +72,16 @@ int main() {
             case 'd':
                 moveBoard(RIGHT);
                 break;
+            case 'R':
+                for (int i = 0; i < SIZE; i++) {
+                    for (int j = 0; j < SIZE; j++) {
+                        board[i][j] = 0;
+                    }
+                }
+                addTile();
+                addTile();
+                score = 0;
+                break;
         }
 
         erase();
@@ -79,7 +89,7 @@ int main() {
 
         if (gameOver()) {
             attron(A_BOLD | COLOR_PAIR(WHITE));
-            mvprintw(((LINES/2)-7) + (SIZE*3), (COLS/2)-10, "GAME OVER");
+            mvprintw((LINES/2)+(SIZE/2)*3, (COLS/2)-(SIZE/2)*5, "GAME OVER");
             attroff(A_BOLD | COLOR_PAIR(WHITE));
             refresh();
             sleep(1);
@@ -116,8 +126,8 @@ int addTile(void) {
 }
 
 void drawBoard(void) {
-    int basex = (COLS/2)-10;
-    int basey = (LINES/2)-7;
+    int basex = (COLS/2)-(SIZE/2)*5;
+    int basey = (LINES/2)-(SIZE/2)*3;
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
             move(basey + i*3, basex + j*5);
@@ -275,7 +285,7 @@ void setupColors() {
     init_color(1+15, 930, 891, 852);
     init_pair(1+15, BROWN, 1+15);
 
-    init_color(2+15, 926, 875, 782);
+    init_color(2+15, 826, 775, 682);
     init_pair(2+15, BROWN, 2+15);
 
     init_color(3+15, 946, 692, 473);
