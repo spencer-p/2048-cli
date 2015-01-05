@@ -285,7 +285,9 @@ void setupColors() {
     init_color(1+15, 930, 891, 852);
     init_pair(1+15, BROWN, 1+15);
 
-    init_color(2+15, 826, 775, 682);
+    init_color(2+15, 876, 825, 732);
+    //init_color(2+15, 826, 775, 682);
+    //init_color(2+15, 926, 875, 782);
     init_pair(2+15, BROWN, 2+15);
 
     init_color(3+15, 946, 692, 473);
