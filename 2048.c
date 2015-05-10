@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <math.h>
+#include <string.h>
 
 #define LEFT 1
 #define RIGHT 2
@@ -16,20 +17,29 @@
 
 #define SIZE 4
 
+char *HIGHSCOREFILE = NULL;
+
 int board[SIZE][SIZE];
 int score = 0;
+int highScore = 0;
 
 int addTile(void);
 void moveBoard(short dir);
 int indexBoard(int y, int x, short dir);
 void setBoard(int y, int x, short dir, int val);
+void resetBoard();
 void drawBoard();
 bool gameOver(void);
+void getHighScoreFile(void);
+int getHighScore(void);
+void writeHighScore(int high);
 void setupColors();
 
 int main() {
 
     srand((unsigned int)time(NULL));
+    getHighScoreFile();
+    highScore = getHighScore();
 
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
@@ -50,7 +60,7 @@ int main() {
     int c;
     drawBoard();
     
-    while ((c = getch()) != 'Q') {
+    while ((c = getch()) != 'Q' && c != 27/*esc*/) {
         switch (c) {
             case KEY_UP:
             case 'k':
@@ -73,15 +83,13 @@ int main() {
                 moveBoard(RIGHT);
                 break;
             case 'R':
-                for (int i = 0; i < SIZE; i++) {
-                    for (int j = 0; j < SIZE; j++) {
-                        board[i][j] = 0;
-                    }
-                }
-                addTile();
-                addTile();
-                score = 0;
+                resetBoard();
                 break;
+        }
+
+        if (score > highScore) {
+            highScore = score;
+            writeHighScore(score);
         }
 
         erase();
@@ -94,8 +102,15 @@ int main() {
             refresh();
             sleep(1);
             flushinp();
-            getch();
-            break;
+            c = getch();
+            if (c != 'q' && c != 'Q' && c != 27/*esc*/) {
+                resetBoard();
+                erase();
+                drawBoard();
+            }
+            else {
+                break;
+            }
         }
     }
     
@@ -152,6 +167,7 @@ void drawBoard(void) {
     }
     attron(COLOR_PAIR(WHITE));
     mvprintw(basey + (SIZE*3)+1, basex, "%d pts", score);
+    mvprintw(basey + (SIZE*3)+2, basex, "best: %d pts", highScore);
     attroff(COLOR_PAIR(WHITE));
 }
 
@@ -246,6 +262,17 @@ void setBoard(int y, int x, short dir, int val) {
     return;
 }
 
+void resetBoard() {
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            board[i][j] = 0;
+        }
+    }
+    addTile();
+    addTile();
+    score = 0;
+}
+
 bool gameOver(void) {
     for (int x = 0; x < SIZE-1; x++) {
         for (int y = 0; y < SIZE-1; y++) {
@@ -321,5 +348,49 @@ void setupColors() {
 
     for (int i = 12+15; i < 18+15; i++) {
         init_pair(i, WHITE, 12+15);
+    }
+}
+
+int getHighScore(void) {
+    FILE *in = fopen(HIGHSCOREFILE, "r");
+    if (!in) {
+        return 0;
+    }
+
+    int a;
+    fscanf(in, "%d", &a);
+
+    fclose(in);
+    return a;
+}
+
+void writeHighScore(int high) {
+    FILE *out = fopen(HIGHSCOREFILE, "w");
+    if (!out) {
+        return;
+    }
+
+    fprintf(out, "%d", high);
+
+    fclose(out);
+}
+
+void getHighScoreFile(void) {
+    //if xdg_config_home exists use that
+    //otherwise use ~/.config
+    //else some file
+    //
+    //note: strlen("/2048") = 5 and strlen("/.config/2048") = 13
+    if (getenv("XDG_CONFIG_HOME") != NULL) {
+        HIGHSCOREFILE = malloc(strlen(getenv("XDG_CONFIG_HOME")) + 6);
+        sprintf(HIGHSCOREFILE, "%s/.2048", getenv("XDG_CONFIG_HOME"));
+    }
+    else if (getenv("HOME") != NULL) {
+        HIGHSCOREFILE = malloc(strlen(getenv("HOME")) + 14);
+        sprintf(HIGHSCOREFILE, "%s/.config/2048", getenv("HOME"));
+
+    }
+    else {
+        HIGHSCOREFILE = "2048_high_score.txt"; //pls no
     }
 }
