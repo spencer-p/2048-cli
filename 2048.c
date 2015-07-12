@@ -6,10 +6,7 @@
 #include <math.h>
 #include <string.h>
 
-#define LEFT 1
-#define RIGHT 2
-#define UP 3 
-#define DOWN 4 
+enum dir { LEFT, RIGHT, UP, DOWN };
 
 #define BROWN 255
 #define WHITE 254
@@ -59,7 +56,7 @@ int main() {
 
     int c;
     drawBoard();
-    
+
     while ((c = getch()) != 'Q' && c != 27/*esc*/) {
         switch (c) {
             case KEY_UP:
@@ -121,7 +118,7 @@ int main() {
 
 int addTile(void) {
     int *spaces[SIZE*SIZE], index = 0;
-    
+
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
             if (board[i][j] == 0) {
@@ -295,14 +292,14 @@ bool gameOver(void) {
     if (board[SIZE-1][SIZE-1] == 0) {
         return false;
     }
-    
+
     return true; //ah!
-    
+
 }
 
 void setupColors() {
     start_color();
-    
+
     init_color(BROWN, 465, 430, 394);
     init_color(WHITE, 973, 961, 946);
     init_color(BLACK, 0, 0, 0);
